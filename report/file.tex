@@ -1,0 +1,317 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\title{Natural Language Processing Coursework}
+\author{Jack Xiuqi Zhang\\CID: 02372321}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%==============================================================================
+\section{Exercise 1: Critical Paper Review}
+%==============================================================================
+
+\subsection{Q1: Primary Contributions}
+
+The paper addresses an under-explored problem in NLP: detecting Patronising and Condescending Language (PCL) towards vulnerable communities in media discourse.
+The authors introduced the \textit{Don't Patronize Me!} dataset, containing 10637 paragraphs concerning vulnerable social groups, annotated for both PCL presence and specific PCL categories.
+The authors evaluate several baseline models, including SVM-based methods, BiLSTM, and BERT variants, with RoBERTa-base achieving the best performance (F1 = 70.63\%) on binary PCL classification.
+The authors also proposed a taxonomy of PCL categories, aimed to help better understand the different forms of PCL and to guide future research.
+
+\subsection{Q2: Technical Strengths}
+
+\begin{itemize}[noitemsep]
+    \item The dataset draws from news sources across 20 English-speaking countries and covers 10 distinct vulnerability keywords, ensuring diversity and representativeness.
+    \item The two step annotation scheme, which first identifies PCL presence and then categorises PCL spans, enables both binary classification and fine-grained category analysis.
+    \item The annotation process used a rigorous two-step methodology, where the first step involved identifying the presence of PCL and the second step involved categorising the type of PCL, which allows for more detailed analysis.
+    \item The paper establishes clear benchmarks through comprehensive evaluation of both traditional methods (SVM, BiLSTM) and transformer-based models (BERT, RoBERTa, DistilBERT).
+\end{itemize}
+
+\subsection{Q3: Key Weaknesses}
+
+\begin{itemize}[noitemsep]
+    \item The dataset is relatively small for training large transformer-based models, particularly for underrepresented categories (e.g., \textit{"The poorer, the merrier"} contains only 64 samples), risking overfitting and limiting generalisation.
+    \item The experiments use only paragraph-level classification, the available span-level annotations are not utilised for training, potentially limiting the models' ability to learn fine-grained PCL patterns.
+\end{itemize}
+
+\newpage
+%==============================================================================
+\section{Exercise 2: Exploratory Data Analysis}
+%==============================================================================
+
+\subsection{EDA Technique 1}
+
+\subsubsection{Visual/Tabular Evidence}
+
+% Include your figure or table here
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{eda_figure1.png}
+    \caption{[Description of your EDA visualisation]}
+    \label{fig:eda1}
+\end{figure}
+
+% OR use a table:
+% \begin{table}[H]
+%     \centering
+%     \begin{tabular}{lcc}
+%         \toprule
+%         \textbf{Metric} & \textbf{PCL} & \textbf{No PCL} \\
+%         \midrule
+%         Count & X & Y \\
+%         \bottomrule
+%     \end{tabular}
+%     \caption{[Description of your EDA table]}
+%     \label{tab:eda1}
+% \end{table}
+
+\subsubsection{Analysis}
+
+\textit{[Describe your findings from this EDA technique. What patterns, distributions, or characteristics did you observe?]}
+
+\subsubsection{Impact Statement}
+
+\textit{[Explain how this specific insight influences your approach to the PCL classification task. How does it affect your model design, preprocessing, or training strategy?]}
+
+\subsection{EDA Technique 2}
+
+\subsubsection{Visual/Tabular Evidence}
+
+% Include your figure or table here
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{eda_figure2.png}
+    \caption{[Description of your second EDA visualisation]}
+    \label{fig:eda2}
+\end{figure}
+
+\subsubsection{Analysis}
+
+\textit{[Describe your findings from this second EDA technique.]}
+
+\subsubsection{Impact Statement}
+
+\textit{[Explain how this insight influences your approach to the PCL classification task.]}
+
+\newpage
+%==============================================================================
+\section{Exercise 3: Proposed Approach}
+%==============================================================================
+
+\subsection{Proposed Approach}
+
+\textit{[Clearly articulate your strategy to surpass the RoBERTa-base baseline. Describe:
+            \begin{itemize}[noitemsep]
+                \item Model architecture or modifications
+                \item Training methodology
+                \item Data preprocessing or augmentation strategies
+                \item Any transfer learning approaches
+            \end{itemize}]}
+
+% Optional: Include a figure or flowchart
+% \begin{figure}[H]
+%     \centering
+%     % \includegraphics[width=0.7\textwidth]{approach_diagram.png}
+%     \caption{Overview of proposed approach}
+%     \label{fig:approach}
+% \end{figure}
+
+\subsection{Rationale and Expected Outcome}
+
+\textit{[Explain:
+            \begin{itemize}[noitemsep]
+                \item Why you chose this approach
+                \item What evidence or intuition supports this choice
+                \item What improvements you expect over the baseline
+                \item Any hypotheses about why this should work for PCL detection
+            \end{itemize}]}
+
+\newpage
+%==============================================================================
+\section{Exercise 4: Model Training}
+%==============================================================================
+
+% Note: This section documents your training process. The actual submission is via GitHub/GitLab.
+
+\noindent\textbf{Repository Link:} \url{https://github.com/yourusername/nlp-pcl-coursework}
+
+\noindent\textbf{BestModel folder contains:}
+\begin{itemize}[noitemsep]
+    \item Training code/notebook
+    \item Model weights (or instructions to reproduce)
+    \item Requirements/dependencies
+\end{itemize}
+
+\textit{[Optional: Brief description of training setup, hyperparameters, compute resources used.]}
+
+\newpage
+%==============================================================================
+\section{Exercise 5.1: Global Evaluation}
+%==============================================================================
+
+% Note: Actual submission is via dev.txt and test.txt in your repository
+
+\noindent\textbf{Submission Files:}
+\begin{itemize}[noitemsep]
+    \item \texttt{dev.txt} - Predictions on official dev set
+    \item \texttt{test.txt} - Predictions on official test set (3832 lines)
+\end{itemize}
+
+\noindent\textbf{Dev Set Performance:}
+\begin{itemize}[noitemsep]
+    \item F1 Score (PCL class): \textit{[Your score]}
+    \item Baseline to beat: 0.48
+\end{itemize}
+
+\newpage
+%==============================================================================
+\section{Exercise 5.2: Local Evaluation}
+%==============================================================================
+
+\subsection{Error Analysis}
+
+\textit{[Perform detailed error analysis. Consider:
+            \begin{itemize}[noitemsep]
+                \item Manually inspect misclassified samples
+                \item Identify patterns in errors (e.g., sarcasm, specific keywords, sentence length)
+                \item Compare with baseline model errors if available
+                \item Categorise error types
+            \end{itemize}]}
+
+\subsubsection{False Positives Analysis}
+
+\textit{[Examples and patterns where model predicted PCL but ground truth was No PCL]}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{10cm}c}
+        \toprule
+        \textbf{Example Text} & \textbf{Predicted/True} \\
+        \midrule
+        {[Example 1]}         & 1/0                     \\
+        {[Example 2]}         & 1/0                     \\
+        \bottomrule
+    \end{tabular}
+    \caption{False Positive Examples}
+    \label{tab:fp}
+\end{table}
+
+\subsubsection{False Negatives Analysis}
+
+\textit{[Examples and patterns where model predicted No PCL but ground truth was PCL]}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{10cm}c}
+        \toprule
+        \textbf{Example Text} & \textbf{Predicted/True} \\
+        \midrule
+        {[Example 1]}         & 0/1                     \\
+        {[Example 2]}         & 0/1                     \\
+        \bottomrule
+    \end{tabular}
+    \caption{False Negative Examples}
+    \label{tab:fn}
+\end{table}
+
+\subsubsection{Error Patterns Summary}
+
+\textit{[Summarise the main patterns observed in errors]}
+
+\subsection{Additional Local Evaluation}
+
+\textit{[Perform at least one additional local evaluation. Options include:]}
+
+\subsubsection{Option A: Ablation Study}
+
+\textit{[Systematically remove components to identify what contributes to performance]}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Configuration} & \textbf{F1 Score} \\
+        \midrule
+        Full Model             & X.XX              \\
+        Without Component A    & X.XX              \\
+        Without Component B    & X.XX              \\
+        \bottomrule
+    \end{tabular}
+    \caption{Ablation Study Results}
+    \label{tab:ablation}
+\end{table}
+
+% \subsubsection{Option B: Confusion Matrix Analysis}
+%
+% \begin{figure}[H]
+%     \centering
+%     % \includegraphics[width=0.5\textwidth]{confusion_matrix.png}
+%     \caption{Confusion Matrix on Dev Set}
+%     \label{fig:cm}
+% \end{figure}
+
+% \subsubsection{Option C: Precision-Recall Curve}
+%
+% \begin{figure}[H]
+%     \centering
+%     % \includegraphics[width=0.6\textwidth]{pr_curve.png}
+%     \caption{Precision-Recall Curve}
+%     \label{fig:pr}
+% \end{figure}
+
+\subsubsection{Insights and Discussion}
+
+\textit{[Discuss what your local evaluation reveals about your model's behaviour, strengths, and limitations]}
+
+\newpage
+%==============================================================================
+\section{Exercise 6: Submission Checklist}
+%==============================================================================
+
+% This section helps ensure your submission is complete and well-organised
+
+\subsection{Report Checklist}
+
+\begin{itemize}
+    \item[$\square$] Exercise 1: Critical Paper Review (Q1, Q2, Q3)
+    \item[$\square$] Exercise 2: Two EDA techniques with visuals, analysis, and impact statements
+    \item[$\square$] Exercise 3: Proposed approach with rationale
+    \item[$\square$] Exercise 5.2: Error analysis and additional local evaluation
+    \item[$\square$] GitHub/GitLab link on front page
+    \item[$\square$] Leaderboard name on front page
+    \item[$\square$] Clear section organisation
+    \item[$\square$] Professional writing quality
+\end{itemize}
+
+\subsection{Repository Checklist}
+
+\begin{itemize}
+    \item[$\square$] Repository is PUBLIC after deadline
+    \item[$\square$] \texttt{BestModel/} folder with training code
+    \item[$\square$] \texttt{dev.txt} - predictions (correct format)
+    \item[$\square$] \texttt{test.txt} - 3832 lines of predictions (0 or 1)
+    \item[$\square$] Clear README with instructions
+    \item[$\square$] Requirements/dependencies listed
+\end{itemize}
+
+%==============================================================================
+% Optional: References
+%==============================================================================
+% \newpage
+% \bibliographystyle{plain}
+% \bibliography{references}
+
+\end{document}
