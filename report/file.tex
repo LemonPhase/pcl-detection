@@ -52,59 +52,120 @@ The authors also proposed a taxonomy of PCL categories, aimed to help better und
 \section{Exercise 2: Exploratory Data Analysis}
 %==============================================================================
 
-\subsection{EDA Technique 1}
+\subsection{EDA Technique 1: Basic Statistical Profiling}
 
 \subsubsection{Visual/Tabular Evidence}
 
-% Include your figure or table here
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=0.8\textwidth]{eda_figure1.png}
-    \caption{[Description of your EDA visualisation]}
+    \includegraphics[width=\textwidth]{figures/basic_statistical_profiling.png}
+    \caption{Basic statistical profiling of the PCL training set. \textit{Top-left}: frequency and percentage of each of the 7 PCL label categories. \textit{Top-right}: distribution of how many labels each sample carries (multi-label distribution). \textit{Bottom}: histogram of token counts per sample with median (38) and mean (44.2) markers.}
     \label{fig:eda1}
 \end{figure}
 
-% OR use a table:
-% \begin{table}[H]
-%     \centering
-%     \begin{tabular}{lcc}
-%         \toprule
-%         \textbf{Metric} & \textbf{PCL} & \textbf{No PCL} \\
-%         \midrule
-%         Count & X & Y \\
-%         \bottomrule
-%     \end{tabular}
-%     \caption{[Description of your EDA table]}
-%     \label{tab:eda1}
-% \end{table}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lrr}
+        \toprule
+        \textbf{Metric}    & \textbf{PCL}                  & \textbf{Non-PCL} \\
+        \midrule
+        Sample count       & 794                           & 7{,}581          \\
+        Proportion         & 9.48\%                        & 90.52\%          \\
+        Imbalance ratio    & \multicolumn{2}{c}{1\,:\,9.5}                    \\
+        \midrule
+        Mean token count   & \multicolumn{2}{c}{44.18}                        \\
+        Median token count & \multicolumn{2}{c}{38}                           \\
+        Max token count    & \multicolumn{2}{c}{820}                          \\
+        Std deviation      & \multicolumn{2}{c}{26.85}                        \\
+        \midrule
+        Vocabulary size    & \multicolumn{2}{c}{26{,}897}                     \\
+        \bottomrule
+    \end{tabular}
+    \caption{Summary statistics for the PCL training set (8{,}375 samples total).}
+    \label{tab:eda1}
+\end{table}
 
 \subsubsection{Analysis}
 
-\textit{[Describe your findings from this EDA technique. What patterns, distributions, or characteristics did you observe?]}
+The basic statistical profiling reveals concrete structural challenges in the PCL dataset:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Severe Class Imbalance.} Exactly 7{,}581 of the 8{,}375 training samples (90.5\%) are Non-PCL, leaving only 794 samples (9.5\%) as positive PCL examples — a $\sim$9.5:1 imbalance. A trivial classifier predicting ``Non-PCL'' for every input would achieve 90.5\% accuracy while having zero utility.
+
+    \item \textbf{Within-PCL Label Sparsity.} Among the 7 PCL categories (Labels 0--6), Label\_0 is the most frequent (574 samples, 6.85\%) and Label\_5 the second most (363, 4.33\%), while Label\_6 is extremely rare with only 29 instances (0.35\%). For the binary task all labelled samples are treated uniformly as PCL\,=\,1, but this internal skew is relevant if fine-grained multi-label classification is attempted later.
+
+    \item \textbf{Label Co-occurrence.} Of the 794 PCL samples, 551 (69.4\%) carry more than one label, with individual samples carrying up to 5 labels simultaneously. When a text is patronising, it typically exhibits multiple PCL patterns at once, indicating PCL is a multi-faceted linguistic phenomenon rather than a single discrete signal.
+
+    \item \textbf{Right-Skewed Token Distribution.} The distribution has a median of 38 tokens, a mean of 44.18 (std 26.85), and a maximum of 820 tokens. Most samples are short-to-medium paragraphs, but a long tail of substantially longer passages must be accommodated.
+\end{enumerate}
 
 \subsubsection{Impact Statement}
 
-\textit{[Explain how this specific insight influences your approach to the PCL classification task. How does it affect your model design, preprocessing, or training strategy?]}
+\begin{itemize}[noitemsep]
+    \item \textbf{Metric Selection.} With 90.5\% Non-PCL, accuracy is actively misleading. Optimisation must target \textbf{Macro-F1} with explicit tracking of the positive-class (PCL) F1. A threshold sweep on the dev set is also necessary, as the default 0.5 decision boundary is biased toward the majority class.
 
-\subsection{EDA Technique 2}
+    \item \textbf{Loss Function.} Standard Binary Cross-Entropy will be overwhelmingly biased toward predicting ``Non-PCL''. \textbf{Weighted Binary Cross-Entropy} with \texttt{pos\_weight}\,$\approx$\,9.5 (reflecting the 9.5:1 ratio) or \textbf{Focal Loss} must be used to redirect gradient updates toward the rare PCL cases.
+
+    \item \textbf{Sampling Strategy.} With a 1:9.5 ratio, a random mini-batch of 32 samples contains on average only $\sim$3 PCL examples — an extremely noisy training signal. \textbf{Stratified sampling} per batch is required to guarantee consistent PCL representation across training steps.
+
+    \item \textbf{Sequence Length.} The median of 38 tokens sits well within 128 subword tokens for most transformer tokenisers, making \texttt{max\_length=128} sufficient for the bulk of the data. However, because the maximum reaches 820 tokens, \texttt{max\_length=256} is the safer default to avoid truncating the longer, elaborately structured PCL paragraphs.
+
+    \item \textbf{Embedding Strategy.} The 26{,}897 unique tokens justify using a \textbf{pre-trained embedding} (e.g.\ GloVe or a BERT sub-word tokeniser) rather than training word embeddings from scratch on this small corpus.
+\end{itemize}
+
+\subsection{EDA Technique 2: Lexical Analysis}
 
 \subsubsection{Visual/Tabular Evidence}
 
-% Include your figure or table here
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=0.8\textwidth]{eda_figure2.png}
-    \caption{[Description of your second EDA visualisation]}
+    \includegraphics[width=\textwidth]{figures/lexical_analysis.png}
+    \caption{Lexical analysis comparing PCL and Non-PCL text. \textit{Row 1}: top-15 bigrams per class (bar charts) and stop-word density box plots. \textit{Row 2}: top-15 trigrams per class and top-15 most frequent content words in PCL text (stop words removed). \textit{Row 3}: word clouds for PCL (red) and Non-PCL (blue) text.}
     \label{fig:eda2}
 \end{figure}
 
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llrllr}
+        \toprule
+        \multicolumn{3}{c}{\textbf{PCL Trigrams}} & \multicolumn{3}{c}{\textbf{Non-PCL Trigrams}}                                                                        \\
+        \cmidrule(r){1-3}\cmidrule(l){4-6}
+        \textbf{Rank}                             & \textbf{Trigram}                              & \textbf{Freq.} & \textbf{Rank} & \textbf{Trigram}   & \textbf{Freq.} \\
+        \midrule
+        1                                         & in need of                                    & 42             & 1             & in need of         & 422            \\
+        2                                         & those in need                                 & 40             & 2             & do n't             & 151            \\
+        3                                         & from poor families                            & 27             & 3             & from poor families & 150            \\
+        4                                         & to those in                                   & 18             & 4             & one of the         & 145            \\
+        5                                         & people in need                                & 16             & 5             & the united states  & 115            \\
+        \bottomrule
+    \end{tabular}
+    \caption{Top-5 trigrams in PCL vs Non-PCL text (raw counts). Per-sample rate for ``those in need'': PCL 0.050 vs Non-PCL 0.012 (4.2$\times$ enrichment).}
+    \label{tab:trigrams}
+\end{table}
+
 \subsubsection{Analysis}
 
-\textit{[Describe your findings from this second EDA technique.]}
+\begin{enumerate}[noitemsep]
+    \item \textbf{N-gram Patterns — Vulnerability-Framing Phrases.} Top bigrams in both classes are dominated by generic English function-word pairs (``of the'', ``in the''), which carry no discriminative power on their own. The signal emerges at the trigram level. Normalising by class size, PCL text shows a \textbf{4.2$\times$ enrichment} for ``those in need'' (0.050 per PCL sample vs 0.012 for Non-PCL), and ``people in need'' appears in PCL's top 10 but not in Non-PCL's. These phrases construct a narrative of passivity and dependency — a hallmark of patronising language. Non-PCL trigrams, by contrast, are factual and geopolitical: ``the united states'', ``the number of'', ``as well as''.
+
+    \item \textbf{Stop Word Density — PCL Uses More Elaborate Syntax.} PCL texts have a mean stop-word density of \textbf{48.47\%} (median 48.8\%) versus \textbf{45.01\%} (median 45.2\%) for Non-PCL — a gap of \textbf{3.46 percentage points} (std $\approx$9.7\% in both classes, confirming the difference is systematic). The higher density reflects the clause-heavy sentence structures of patronising language (e.g.\ \textit{``they are the ones who are in need of our help''}) compared to the more direct, noun-heavy style of factual reporting.
+
+    \item \textbf{Distinctive Vocabulary (Per-Sample Rates).} After normalising for class size, several words are significantly over-represented in PCL text: ``need'' (2.2$\times$), ``poor'' (2.2$\times$), ``children'', ``homeless'', and ``help'' appear in the PCL top-10 but are absent from the Non-PCL top-10 entirely. This confirms a PCL lexical fingerprint centred on \textit{vulnerability, dependency, and aid}. Non-PCL top words (``immigrants'', ``vulnerable'', ``disabled'') cover the same topic domain but without the emotional framing.
+\end{enumerate}
 
 \subsubsection{Impact Statement}
 
-\textit{[Explain how this insight influences your approach to the PCL classification task.]}
+\begin{itemize}[noitemsep]
+    \item \textbf{Retain Stop Words for Bag-of-Words Models.} The 3.46\% higher stop-word density in PCL text means connective and auxiliary words actively participate in PCL phrasing. Trigrams like ``in need of'', ``to those in'', and ``those in need'' depend entirely on stop words. For any TF-IDF baseline, stop words must be \textbf{retained} with \texttt{ngram\_range=(1,\,3)}.
+
+    \item \textbf{N-gram Features for Classical Models.} The distinctive trigrams are strong discriminative signals that a unigram model would miss entirely. Any SVM or logistic regression baseline should be trained on \textbf{TF-IDF weighted 1--3-grams}.
+
+    \item \textbf{Class-Size Normalisation in Analysis.} Raw frequency counts are dominated by the 9.5$\times$ larger Non-PCL class. Per-sample enrichment ratios must be computed for any fair lexical comparison, as demonstrated above.
+
+    \item \textbf{Pre-trained Embeddings Domain Alignment.} The PCL vocabulary is centred on humanitarian/social-narrative themes. Embeddings pre-trained on news or social-media corpora will better capture these semantic relationships than generic web-crawl embeddings.
+
+    \item \textbf{Keyword-Based Baseline.} The identified enriched vocabulary enables a simple TF-IDF logistic regression baseline — a useful lower bound to verify that the trained neural model learns beyond surface lexical patterns.
+\end{itemize}
 
 \newpage
 %==============================================================================
