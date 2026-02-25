@@ -21,6 +21,10 @@
 *.synctex.gz
 *.pdf
 
+# Model checkpoints / large binary artifacts
+*.npy
+*.ckpt
+
 # Python
 __pycache__/
 *.py[cod]
