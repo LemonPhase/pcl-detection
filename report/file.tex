@@ -90,7 +90,7 @@ The authors also proposed a taxonomy of PCL categories, aimed to help better und
 The basic statistical profiling reveals concrete structural challenges in the PCL dataset:
 
 \begin{enumerate}[noitemsep]
-    \item \textbf{Severe Class Imbalance.} Exactly 7{,}581 of the 8{,}375 training samples (90.5\%) are Non-PCL, leaving only 794 samples (9.5\%) as positive PCL examples — a $\sim$9.5:1 imbalance. A trivial classifier predicting ``Non-PCL'' for every input would achieve 90.5\% accuracy while having zero utility.
+    \item \textbf{Severe Class Imbalance.} Exactly 7{,}581 of the 8{,}375 training samples (90.5\%) are Non-PCL, leaving only 794 samples (9.5\%) as positive PCL examples, yielding a $\sim$9.5:1 imbalance. A trivial classifier predicting ``Non-PCL'' for every input would achieve 90.5\% accuracy while having zero utility.
 
     \item \textbf{Within-PCL Label Sparsity.} Among the 7 PCL categories (Labels 0--6), Label\_0 is the most frequent (574 samples, 6.85\%) and Label\_5 the second most (363, 4.33\%), while Label\_6 is extremely rare with only 29 instances (0.35\%). For the binary task all labelled samples are treated uniformly as PCL\,=\,1, but this internal skew is relevant if fine-grained multi-label classification is attempted later.
 
@@ -106,7 +106,7 @@ The basic statistical profiling reveals concrete structural challenges in the PC
 
     \item \textbf{Loss Function.} Standard Binary Cross-Entropy will be overwhelmingly biased toward predicting ``Non-PCL''. \textbf{Weighted Binary Cross-Entropy} with \texttt{pos\_weight}\,$\approx$\,9.5 (reflecting the 9.5:1 ratio) or \textbf{Focal Loss} must be used to redirect gradient updates toward the rare PCL cases.
 
-    \item \textbf{Sampling Strategy.} With a 1:9.5 ratio, a random mini-batch of 32 samples contains on average only $\sim$3 PCL examples — an extremely noisy training signal. \textbf{Stratified sampling} per batch is required to guarantee consistent PCL representation across training steps.
+    \item \textbf{Sampling Strategy.} With a 1:9.5 ratio, a random mini-batch of 32 samples contains on average only $\sim$3 PCL examples, resulting in an extremely noisy training signal. \textbf{Stratified sampling} per batch is required to guarantee consistent PCL representation across training steps.
 
     \item \textbf{Sequence Length.} The median of 38 tokens sits well within 128 subword tokens for most transformer tokenisers, making \texttt{max\_length=128} sufficient for the bulk of the data. However, because the maximum reaches 820 tokens, \texttt{max\_length=256} is the safer default to avoid truncating the longer, elaborately structured PCL paragraphs.
 
@@ -146,9 +146,9 @@ The basic statistical profiling reveals concrete structural challenges in the PC
 \subsubsection{Analysis}
 
 \begin{enumerate}[noitemsep]
-    \item \textbf{N-gram Patterns — Vulnerability-Framing Phrases.} Top bigrams in both classes are dominated by generic English function-word pairs (``of the'', ``in the''), which carry no discriminative power on their own. The signal emerges at the trigram level. Normalising by class size, PCL text shows a \textbf{4.2$\times$ enrichment} for ``those in need'' (0.050 per PCL sample vs 0.012 for Non-PCL), and ``people in need'' appears in PCL's top 10 but not in Non-PCL's. These phrases construct a narrative of passivity and dependency — a hallmark of patronising language. Non-PCL trigrams, by contrast, are factual and geopolitical: ``the united states'', ``the number of'', ``as well as''.
+    \item \textbf{N-gram Patterns — Vulnerability-Framing Phrases.} Top bigrams in both classes are dominated by generic English function-word pairs (``of the'', ``in the''), which carry no discriminative power on their own. The signal emerges at the trigram level. Normalising by class size, PCL text shows a \textbf{4.2$\times$ enrichment} for ``those in need'' (0.050 per PCL sample vs 0.012 for Non-PCL), and ``people in need'' appears in PCL's top 10 but not in Non-PCL's. These phrases construct a narrative of passivity and dependency, which is a hallmark of patronising language. Non-PCL trigrams, by contrast, are factual and geopolitical: ``the united states'', ``the number of'', ``as well as''.
 
-    \item \textbf{Stop Word Density — PCL Uses More Elaborate Syntax.} PCL texts have a mean stop-word density of \textbf{48.47\%} (median 48.8\%) versus \textbf{45.01\%} (median 45.2\%) for Non-PCL — a gap of \textbf{3.46 percentage points} (std $\approx$9.7\% in both classes, confirming the difference is systematic). The higher density reflects the clause-heavy sentence structures of patronising language (e.g.\ \textit{``they are the ones who are in need of our help''}) compared to the more direct, noun-heavy style of factual reporting.
+    \item \textbf{Stop Word Density — PCL Uses More Elaborate Syntax.} PCL texts have a mean stop-word density of \textbf{48.47\%} (median 48.8\%) versus \textbf{45.01\%} (median 45.2\%) for Non-PCL, representing a gap of \textbf{3.46 percentage points} (std $\approx$9.7\% in both classes, confirming the difference is systematic). The higher density reflects the clause-heavy sentence structures of patronising language (e.g.\ \textit{``they are the ones who are in need of our help''}) compared to the more direct, noun-heavy style of factual reporting.
 
     \item \textbf{Distinctive Vocabulary (Per-Sample Rates).} After normalising for class size, several words are significantly over-represented in PCL text: ``need'' (2.2$\times$), ``poor'' (2.2$\times$), ``children'', ``homeless'', and ``help'' appear in the PCL top-10 but are absent from the Non-PCL top-10 entirely. This confirms a PCL lexical fingerprint centred on \textit{vulnerability, dependency, and aid}. Non-PCL top words (``immigrants'', ``vulnerable'', ``disabled'') cover the same topic domain but without the emotional framing.
 \end{enumerate}
@@ -164,7 +164,7 @@ The basic statistical profiling reveals concrete structural challenges in the PC
 
     \item \textbf{Pre-trained Embeddings Domain Alignment.} The PCL vocabulary is centred on humanitarian/social-narrative themes. Embeddings pre-trained on news or social-media corpora will better capture these semantic relationships than generic web-crawl embeddings.
 
-    \item \textbf{Keyword-Based Baseline.} The identified enriched vocabulary enables a simple TF-IDF logistic regression baseline — a useful lower bound to verify that the trained neural model learns beyond surface lexical patterns.
+    \item \textbf{Keyword-Based Baseline.} The identified enriched vocabulary enables a simple TF-IDF logistic regression baseline, providing a useful lower bound to verify that the trained neural model learns beyond surface lexical patterns.
 \end{itemize}
 
 \newpage
@@ -174,49 +174,128 @@ The basic statistical profiling reveals concrete structural challenges in the PC
 
 \subsection{Proposed Approach}
 
-\textit{[Clearly articulate your strategy to surpass the RoBERTa-base baseline. Describe:
-            \begin{itemize}[noitemsep]
-                \item Model architecture or modifications
-                \item Training methodology
-                \item Data preprocessing or augmentation strategies
-                \item Any transfer learning approaches
-            \end{itemize}]}
+We propose to fine-tune \textbf{RoBERTa-base} (Liu et al., 2019) as the core encoder, augmented with three targeted modifications designed around the structural challenges identified in the EDA: a dual-head multi-task architecture that exploits the dataset's fine-grained label taxonomy, a compound strategy to mitigate the 9.5:1 class imbalance, and context-aware input formatting that injects the vulnerability keyword as an explicit signal.
 
-% Optional: Include a figure or flowchart
-% \begin{figure}[H]
-%     \centering
-%     % \includegraphics[width=0.7\textwidth]{approach_diagram.png}
-%     \caption{Overview of proposed approach}
-%     \label{fig:approach}
-% \end{figure}
+\subsubsection{Model Architecture}
+
+We plan to attach two lightweight linear heads to the \texttt{[CLS]} token representation of a fine-tuned RoBERTa-base encoder. The \textbf{primary binary head} will produce the PCL / Non-PCL decision used at inference time. In addition, an \textbf{auxiliary multi-label head} will simultaneously predict the 7 fine-grained PCL category labels defined by P\'{e}rez-Almendros et al.\ (2020) during training. The two heads share the same encoder and are trained jointly under the combined loss:
+\begin{equation}
+    \mathcal{L} = \mathcal{L}_{\text{focal}} + \lambda \cdot \mathcal{L}_{\text{aux}}
+\end{equation}
+where $\mathcal{L}_{\text{focal}}$ is Binary Focal Loss (Lin et al., 2017) on the binary head and $\mathcal{L}_{\text{aux}}$ is Binary Cross-Entropy on the auxiliary head. The auxiliary head will be discarded at inference; it serves purely as an additional supervision signal during training.
+
+\subsubsection{Data Preprocessing}
+
+Each input will be formatted as \texttt{[keyword] paragraph\_text}, prepending the vulnerability keyword (e.g.\ \textit{homeless}, \textit{immigrants}) as a prefix token. This injects the topic context directly into the sequence without any architectural overhead, aligning the model's input with the annotation process, in which annotators were presented with paragraphs together with their associated keyword. We will use \texttt{max\_length=256} tokens to accommodate the long-tail of longer paragraphs identified in the EDA while keeping memory usage manageable.
+
+\subsubsection{Class-Imbalance Mitigation}
+
+We propose three complementary strategies to address the 9.5:1 class imbalance:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Weighted batch sampling} to oversample PCL positives in every mini-batch, ensuring a consistent minority-class gradient signal throughout training.
+    \item \textbf{Focal Loss} (Lin et al., 2017) to down-weight easy-to-classify negatives at the loss level, directing gradient updates toward the harder PCL examples.
+    \item \textbf{Post-hoc decision threshold optimisation} by sweeping thresholds on the official dev set after training, replacing the default 0.5 boundary which is biased toward the majority class.
+\end{enumerate}
+
+\subsubsection{Optimisation Strategy}
+
+We will use AdamW with a \textbf{two-group learning rate schedule}: a lower rate for the pre-trained encoder layers to avoid catastrophic forgetting, and a higher rate for the newly initialised classification heads. A cosine learning rate schedule with linear warmup will be applied, alongside gradient accumulation to achieve a larger effective batch size without requiring additional GPU memory. Early stopping on dev F1 will be used to prevent overfitting.
 
 \subsection{Rationale and Expected Outcome}
 
-\textit{[Explain:
-            \begin{itemize}[noitemsep]
-                \item Why you chose this approach
-                \item What evidence or intuition supports this choice
-                \item What improvements you expect over the baseline
-                \item Any hypotheses about why this should work for PCL detection
-            \end{itemize}]}
+\subsubsection{Rationale}
+
+\textbf{Multi-task learning via the auxiliary head.}
+The \textit{Don't Patronize Me!} dataset provides 7 fine-grained PCL category labels, including \textit{Unneeded Rescue}, \textit{Shallow Solution}, and \textit{Compassion}, which encode structurally distinct manifestations of patronising language. We hypothesise that training the model to simultaneously predict these categories will force the shared encoder to learn richer, semantically grounded representations of PCL, rather than relying on shallow surface correlations. This is particularly important given the small size of the positive class (794 examples), where additional supervision signal is valuable.
+
+\textbf{Focal Loss and weighted sampling.}
+The EDA showed that standard Binary Cross-Entropy on this dataset would concentrate gradient updates overwhelmingly on the 90.5\% Non-PCL majority, pushing the model toward the trivial all-negative prediction. Focal Loss addresses this at the loss level, while the weighted sampler ensures each batch reflects the minority class at the data level. Using both in tandem provides two independent, complementary mechanisms against the imbalance.
+
+\textbf{Keyword prefix injection.}
+The lexical EDA demonstrated that discriminative PCL phrases (e.g.\ ``those in need'') co-occur with specific vulnerability topics. Prepending the keyword makes this context explicit and enables the model to learn topic-conditioned PCL patterns. This is a zero-parameter improvement that also aligns the input with how the dataset was annotated.
+
+\textbf{Threshold optimisation.}
+The default 0.5 decision threshold is calibrated for balanced classes. For an imbalanced task like PCL detection, sweeping the threshold on the dev set to maximise F1 is expected to yield a meaningful free improvement in the precision--recall trade-off.
+
+\subsubsection{Expected Outcome}
+
+The shared task baseline RoBERTa-base model achieves $\text{F1} = 0.48$ on the official dev set (P\'{e}rez-Almendros et al., 2020). We expect our proposed modifications to deliver a substantial improvement, primarily by increasing the model's recall on PCL-positive examples through better imbalance handling, while the auxiliary multi-task objective and keyword context injection should additionally improve precision by anchoring predictions in structured PCL patterns.
 
 \newpage
 %==============================================================================
 \section{Exercise 4: Model Training}
 %==============================================================================
 
-% Note: This section documents your training process. The actual submission is via GitHub/GitLab.
+The proposed approach was implemented in PyTorch using the HuggingFace \texttt{transformers} library. The full training code and model weights are available in the \texttt{BestModel/} folder of the repository.
 
-\noindent\textbf{Repository Link:} \url{https://github.com/yourusername/nlp-pcl-coursework}
+\noindent\textbf{Repository Link:} \url{https://github.com/LemonPhase/pcl-detection}
 
-\noindent\textbf{BestModel folder contains:}
-\begin{itemize}[noitemsep]
-    \item Training code/notebook
-    \item Model weights (or instructions to reproduce)
-    \item Requirements/dependencies
-\end{itemize}
+\subsection{Implementation Details}
 
-\textit{[Optional: Brief description of training setup, hyperparameters, compute resources used.]}
+\subsubsection{Architecture}
+
+RoBERTa-base was loaded from the \texttt{FacebookAI/roberta-base} checkpoint. Two linear heads were attached to the \texttt{[CLS]} token after a shared Dropout layer ($p=0.2$): a binary head \texttt{Linear(768, 1)} and an auxiliary 7-label head \texttt{Linear(768, 7)}. Both heads were initialised with small normal weights (std $= 0.02$) and zero biases for training stability.
+
+\subsubsection{Hyperparameters}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Hyperparameter}         & \textbf{Value}                   \\
+        \midrule
+        Encoder learning rate           & $1.5 \times 10^{-5}$             \\
+        Head learning rate              & $1 \times 10^{-4}$               \\
+        Weight decay                    & 0.01                             \\
+        Effective batch size            & 32 (16 $\times$ 2 grad.\ accum.) \\
+        Max sequence length             & 256 tokens                       \\
+        Dropout                         & 0.2                              \\
+        Focal Loss $\gamma$             & 2.0                              \\
+        Auxiliary loss weight $\lambda$ & 0.3                              \\
+        Positive sampling ratio         & 33\%                             \\
+        LR schedule                     & Cosine with warmup               \\
+        Warmup ratio                    & 6\%                              \\
+        Max epochs                      & 10                               \\
+        Early stopping patience         & 5 epochs                         \\
+        Gradient clip norm              & 1.0                              \\
+        \bottomrule
+    \end{tabular}
+    \caption{Hyperparameters used for the best submitted model.}
+    \label{tab:hyperparams}
+\end{table}
+
+\subsubsection{Data Split and Evaluation Protocol}
+
+The official training set (8,375 samples) was used for training and the official dev set (399 samples) was used as the held-out evaluation set throughout all experiments; no internal dev split was created, as the official dev set provides a stable benchmark comparable across runs. The official test set (3,832 samples, labels withheld) was used only for final prediction.
+
+After training, a threshold sweep over $t \in [0.05, 0.95]$ (step 0.01) was run on the dev set to select the decision boundary maximising PCL-class F1.
+
+\subsubsection{Training Results}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{rcccc}
+        \toprule
+        \textbf{Epoch} & \textbf{Train Loss} & \textbf{Dev F1} & \textbf{Dev P} & \textbf{Dev R} \\
+        \midrule
+        1              & 0.2346              & 0.562           & 0.470          & 0.698          \\
+        2              & 0.1057              & 0.524           & 0.387          & 0.809          \\
+        3              & 0.0651              & 0.572           & 0.500          & 0.668          \\
+        4              & 0.0501              & 0.538           & 0.643          & 0.462          \\
+        5              & 0.0327              & 0.574           & 0.560          & 0.588          \\
+        6              & 0.0199              & 0.588           & 0.538          & 0.648          \\
+        \textbf{7}     & \textbf{0.0135}     & \textbf{0.606}  & \textbf{0.649} & \textbf{0.568} \\
+        8              & 0.0098              & 0.603           & 0.663          & 0.553          \\
+        9              & 0.0072              & 0.584           & 0.579          & 0.588          \\
+        10             & 0.0070              & 0.585           & 0.582          & 0.588          \\
+        \bottomrule
+    \end{tabular}
+    \caption{Per-epoch training loss and dev-set performance. Best checkpoint (epoch 7) shown in bold.}
+    \label{tab:training}
+\end{table}
+
+The best checkpoint was saved at epoch 7 with dev F1 $= 0.606$, representing a $\sim$26\% relative improvement over the 0.48 baseline. Training loss continued to decrease after epoch 7, but dev F1 plateaued and declined, indicating overfitting; early stopping triggered after epoch 10 (patience exhausted). The optimal decision threshold found by the sweep was $t = 0.50$.
 
 \newpage
 %==============================================================================
@@ -369,10 +448,27 @@ The basic statistical profiling reveals concrete structural challenges in the PC
 \end{itemize}
 
 %==============================================================================
-% Optional: References
+\newpage
+\section*{References}
 %==============================================================================
-% \newpage
-% \bibliographystyle{plain}
-% \bibliography{references}
+
+\begin{thebibliography}{9}
+
+    \bibitem{perez2020dont}
+    P\'{e}rez-Almendros, C., Espinosa-Anke, L., and Schockaert, S. (2020).
+    \textit{Don't Patronize Me! An Annotated Dataset with Patronizing and Condescending Language towards Vulnerable Communities.}
+    In \textit{Proceedings of COLING 2020}, pages 5891--5902.
+
+    \bibitem{liu2019roberta}
+    Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., Levy, O., Lewis, M., Zettlemoyer, L., and Stoyanov, V. (2019).
+    \textit{RoBERTa: A Robustly Optimized BERT Pretraining Approach.}
+    arXiv preprint arXiv:1907.11692.
+
+    \bibitem{lin2017focal}
+    Lin, T.-Y., Goyal, P., Girshick, R., He, K., and Doll\'{a}r, P. (2017).
+    \textit{Focal Loss for Dense Object Detection.}
+    In \textit{Proceedings of ICCV 2017}, pages 2980--2988.
+
+\end{thebibliography}
 
 \end{document}

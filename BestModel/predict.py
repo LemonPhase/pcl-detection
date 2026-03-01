@@ -69,7 +69,7 @@ def predict(args):
 
     # Threshold
     thresh_file = args.threshold_file or os.path.join(
-        root, "RoBERTa/checkpoints/best_threshold.txt"
+        root, "BestModel/checkpoints/best_threshold.txt"
     )
     if os.path.exists(thresh_file):
         with open(thresh_file) as fh:
@@ -82,7 +82,7 @@ def predict(args):
     # Checkpoints
     checkpoints = args.checkpoints
     if not checkpoints:
-        default = os.path.join(root, "RoBERTa/checkpoints/best_model.pt")
+        default = os.path.join(root, "BestModel/checkpoints/best_model.pt")
         if not os.path.exists(default):
             raise FileNotFoundError(f"No checkpoint at {default}. Run train.py first.")
         checkpoints = [default]

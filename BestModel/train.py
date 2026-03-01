@@ -325,7 +325,7 @@ def parse_args():
     # Paths
     p.add_argument("--train_path",      default=os.path.join(root, "data/processed/train.csv"))
     p.add_argument("--dev_path",        default=os.path.join(root, "data/processed/dev.csv"))
-    p.add_argument("--output_dir",      default=os.path.join(root, "RoBERTa/checkpoints"))
+    p.add_argument("--output_dir",      default=os.path.join(root, "BestModel/checkpoints"))
     # Model
     p.add_argument("--model_name",      default="roberta-base")
     p.add_argument("--max_length",      type=int,   default=256)
