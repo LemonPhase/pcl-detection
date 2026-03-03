@@ -1,0 +1,8 @@
+category,TP,FN,total_positives,miss_rate
+Unbalanced Power Relations,93,49,142,0.345
+Shallow Solution,26,10,36,0.278
+Presupposition,31,31,62,0.5
+Authority Voice,20,18,38,0.474
+Metaphor,33,19,52,0.365
+Compassion,65,41,106,0.387
+"The Poorer, the Merrier",5,6,11,0.545

@@ -65,7 +65,7 @@ class FocalLoss(nn.Module):
 
 class PCLModel(nn.Module):
     """
-    RoBERTa-large with:
+    RoBERTa-base with:
       • binary head  (primary task)
       • 7-label auxiliary multi-task head
 

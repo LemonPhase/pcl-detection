@@ -1,0 +1,25 @@
+=== Error Analysis Summary ===
+
+Model: RoBERTa-base dual-head (BestModel)
+Dev set: 2094 samples  |  PCL positives: 199 (9.5%)
+Decision threshold: 0.50
+
+Global performance
+  F1 (PCL):        0.6059
+  Precision (PCL): 0.6494
+  Recall (PCL):    0.5678
+  PR-AUC:          0.6079
+  FPR:             0.0322
+  FNR:             0.4322
+
+Confusion matrix: TP=113  FP=61  FN=86  TN=1834
+
+Most-missed PCL category (highest miss rate):
+The Poorer, the Merrier  miss_rate=0.545
+
+Keyword with most false negatives:
+poor-families  FN=20  recall=0.474
+
+Token length:
+  FP mean: 53.3  FN mean: 54.6
+  TP mean: 53.6  TN mean: 46.5

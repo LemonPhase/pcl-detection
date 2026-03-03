@@ -1,0 +1,26 @@
+=== Global Metrics ===
+              precision    recall  f1-score   support
+
+     Non-PCL     0.9552    0.9678    0.9615      1895
+         PCL     0.6494    0.5678    0.6059       199
+
+    accuracy                         0.9298      2094
+   macro avg     0.8023    0.7678    0.7837      2094
+weighted avg     0.9261    0.9298    0.9277      2094
+
+Confusion Matrix:
+         Predicted Non-PCL   Predicted PCL
+True Non-PCL       1834              61
+True PCL             86             113
+
+False Positive Rate (FPR): 0.0322   (61/1895)
+False Negative Rate (FNR): 0.4322   (86/199)
+Average Precision (PR-AUC): 0.6079
+
+Error counts: TP=113  FP=61  FN=86  TN=1834
+
+=== Token Length by Quadrant ===
+  TP: mean=53.6  median=44  max=165.0
+  FP: mean=53.3  median=44  max=144.0
+  FN: mean=54.6  median=52  max=175.0
+  TN: mean=46.5  median=41  max=272.0

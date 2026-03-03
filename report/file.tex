@@ -9,9 +9,12 @@
 \usepackage{float}
 \usepackage{enumitem}
 \usepackage{xcolor}
+\usepackage{microtype}
 
 \title{Natural Language Processing Coursework}
-\author{Jack Xiuqi Zhang\\CID: 02372321}
+\author{Jack Xiuqi Zhang\\CID: 02372321\\[0.5em]
+\small Leaderboard name: \texttt{jz4623}\\[0.3em]
+\small GitHub: \url{https://github.com/LemonPhase/pcl-detection}}
 \date{\today}
 
 \begin{document}
@@ -21,35 +24,35 @@
 \newpage
 
 %==============================================================================
-\section{Exercise 1: Critical Paper Review}
+\section{Critical Paper Review}
 %==============================================================================
 
 \subsection{Q1: Primary Contributions}
 
-The paper addresses an under-explored problem in NLP: detecting Patronising and Condescending Language (PCL) towards vulnerable communities in media discourse.
-The authors introduced the \textit{Don't Patronize Me!} dataset, containing 10637 paragraphs concerning vulnerable social groups, annotated for both PCL presence and specific PCL categories.
-The authors evaluate several baseline models, including SVM-based methods, BiLSTM, and BERT variants, with RoBERTa-base achieving the best performance (F1 = 70.63\%) on binary PCL classification.
-The authors also proposed a taxonomy of PCL categories, aimed to help better understand the different forms of PCL and to guide future research.
+The paper addresses an under-explored problem in NLP: detecting Patronising and Condescending Language (PCL) towards vulnerable communities in media discourse \cite{perez-almendros-etal-2020-dont}.
+The authors introduced the \textit{Don't Patronize Me!} dataset, containing 10637 paragraphs concerning vulnerable social groups, annotated for both PCL presence and specific PCL categories \cite{perez-almendros-etal-2020-dont}.
+The authors evaluate several baseline models, including SVM-based methods, BiLSTM, and BERT variants, with RoBERTa-base achieving the best performance on binary PCL classification \cite{perez-almendros-etal-2020-dont}.
+The authors also proposed a taxonomy of PCL categories, aimed to help better understand the different forms of PCL and to guide future research \cite{perez-almendros-etal-2020-dont}.
 
 \subsection{Q2: Technical Strengths}
 
 \begin{itemize}[noitemsep]
-    \item The dataset draws from news sources across 20 English-speaking countries and covers 10 distinct vulnerability keywords, ensuring diversity and representativeness.
-    \item The two step annotation scheme, which first identifies PCL presence and then categorises PCL spans, enables both binary classification and fine-grained category analysis.
+    \item The dataset draws from news sources across 20 English-speaking countries and covers 10 distinct vulnerability keywords, ensuring diversity and representativeness \cite{perez-almendros-etal-2020-dont}.
+    \item The two step annotation scheme, which first identifies PCL presence and then categorises PCL spans, enables both binary classification and fine-grained category analysis \cite{perez-almendros-etal-2020-dont}.
     \item The annotation process used a rigorous two-step methodology, where the first step involved identifying the presence of PCL and the second step involved categorising the type of PCL, which allows for more detailed analysis.
-    \item The paper establishes clear benchmarks through comprehensive evaluation of both traditional methods (SVM, BiLSTM) and transformer-based models (BERT, RoBERTa, DistilBERT).
+    \item The paper establishes clear benchmarks through comprehensive evaluation of both traditional methods (SVM, BiLSTM) and transformer-based models (BERT, RoBERTa, DistilBERT) \cite{perez-almendros-etal-2020-dont}.
 \end{itemize}
 
 \subsection{Q3: Key Weaknesses}
 
 \begin{itemize}[noitemsep]
-    \item The dataset is relatively small for training large transformer-based models, particularly for underrepresented categories (e.g., \textit{"The poorer, the merrier"} contains only 64 samples), risking overfitting and limiting generalisation.
+    \item The dataset is relatively small for training large transformer-based models, particularly for underrepresented categories (e.g., \textit{"The poorer, the merrier"} contains only 64 samples), risking overfitting and limiting generalisation \cite{perez-almendros-etal-2020-dont}.
     \item The experiments use only paragraph-level classification, the available span-level annotations are not utilised for training, potentially limiting the models' ability to learn fine-grained PCL patterns.
 \end{itemize}
 
 \newpage
 %==============================================================================
-\section{Exercise 2: Exploratory Data Analysis}
+\section{Exploratory Data Analysis}
 %==============================================================================
 
 \subsection{EDA Technique 1: Basic Statistical Profiling}
@@ -102,11 +105,11 @@ The basic statistical profiling reveals concrete structural challenges in the PC
 \subsubsection{Impact Statement}
 
 \begin{itemize}[noitemsep]
-    \item \textbf{Metric Selection.} With 90.5\% Non-PCL, accuracy is actively misleading. Optimisation must target \textbf{Macro-F1} with explicit tracking of the positive-class (PCL) F1. A threshold sweep on the dev set is also necessary, as the default 0.5 decision boundary is biased toward the majority class.
+    \item \textbf{Metric Selection.} With 90.5\% Non-PCL, accuracy is actively misleading. Optimisation must target the \textbf{positive-class (PCL) F1} directly. A threshold sweep on the dev set is also necessary, as the default 0.5 decision boundary is biased toward the majority class.
 
-    \item \textbf{Loss Function.} Standard Binary Cross-Entropy will be overwhelmingly biased toward predicting ``Non-PCL''. \textbf{Weighted Binary Cross-Entropy} with \texttt{pos\_weight}\,$\approx$\,9.5 (reflecting the 9.5:1 ratio) or \textbf{Focal Loss} must be used to redirect gradient updates toward the rare PCL cases.
+    \item \textbf{Loss Function.} Standard Binary Cross-Entropy will be overwhelmingly biased toward predicting ``Non-PCL''. \textbf{Weighted Binary Cross-Entropy} with {\texttt{pos\_weight}}\,$\approx$\,9.5 (reflecting the 9.5:1 ratio) or \textbf{Focal Loss} must be used to redirect gradient updates toward the rare PCL cases.
 
-    \item \textbf{Sampling Strategy.} With a 1:9.5 ratio, a random mini-batch of 32 samples contains on average only $\sim$3 PCL examples, resulting in an extremely noisy training signal. \textbf{Stratified sampling} per batch is required to guarantee consistent PCL representation across training steps.
+    \item \textbf{Sampling Strategy.} With a 1:9.5 ratio, a random mini-batch of 32 samples contains on average only $\sim$3 PCL examples, resulting in an extremely noisy training signal. \textbf{Weighted batch sampling} to oversample PCL positives is required to guarantee a consistent minority-class signal across training steps.
 
     \item \textbf{Sequence Length.} The median of 38 tokens sits well within 128 subword tokens for most transformer tokenisers, making \texttt{max\_length=128} sufficient for the bulk of the data. However, because the maximum reaches 820 tokens, \texttt{max\_length=256} is the safer default to avoid truncating the longer, elaborately structured PCL paragraphs.
 
@@ -119,36 +122,43 @@ The basic statistical profiling reveals concrete structural challenges in the PC
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figures/lexical_analysis.png}
-    \caption{Lexical analysis comparing PCL and Non-PCL text. \textit{Row 1}: top-15 bigrams per class (bar charts) and stop-word density box plots. \textit{Row 2}: top-15 trigrams per class and top-15 most frequent content words in PCL text (stop words removed). \textit{Row 3}: word clouds for PCL (red) and Non-PCL (blue) text.}
-    \label{fig:eda2}
+    \includegraphics[width=\textwidth]{figures/lexical_analysis_ngrams.png}
+    \caption{N-gram and vocabulary analysis. \textit{Row 1}: top-15 bigrams per class. \textit{Row 2}: top-15 trigrams per class. \textit{Row 3}: top-15 most frequent content words in PCL text (stop words removed) and per-sample trigram enrichment chart (PCL vs Non-PCL rates, normalised by class size).}
+    \label{fig:eda2a}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/lexical_analysis_wordclouds.png}
+    \caption{Word clouds for PCL (red, left) and Non-PCL (blue, right) text, with stop words removed. The PCL cloud is dominated by vulnerability and dependency terms; the Non-PCL cloud reflects geographic and institutional references.}
+    \label{fig:eda2b}
 \end{figure}
 
 \begin{table}[H]
     \centering
-    \begin{tabular}{llrllr}
+    \begin{tabular}{llrrllrr}
         \toprule
-        \multicolumn{3}{c}{\textbf{PCL Trigrams}} & \multicolumn{3}{c}{\textbf{Non-PCL Trigrams}}                                                                        \\
-        \cmidrule(r){1-3}\cmidrule(l){4-6}
-        \textbf{Rank}                             & \textbf{Trigram}                              & \textbf{Freq.} & \textbf{Rank} & \textbf{Trigram}   & \textbf{Freq.} \\
+        \multicolumn{4}{c}{\textbf{PCL Trigrams} ($n=794$)} & \multicolumn{4}{c}{\textbf{Non-PCL Trigrams} ($n=7{,}581$)}                                                                                                    \\
+        \cmidrule(r){1-4}\cmidrule(l){5-8}
+        \textbf{Rank}                                       & \textbf{Trigram}                                            & \textbf{Freq.} & \textbf{\%} & \textbf{Rank} & \textbf{Trigram}   & \textbf{Freq.} & \textbf{\%} \\
         \midrule
-        1                                         & in need of                                    & 42             & 1             & in need of         & 422            \\
-        2                                         & those in need                                 & 40             & 2             & do n't             & 151            \\
-        3                                         & from poor families                            & 27             & 3             & from poor families & 150            \\
-        4                                         & to those in                                   & 18             & 4             & one of the         & 145            \\
-        5                                         & people in need                                & 16             & 5             & the united states  & 115            \\
+        1                                                   & in need of                                                  & 42             & 5.3\%       & 1             & in need of         & 422            & 5.6\%       \\
+        2                                                   & those in need                                               & 40             & 5.0\%       & 2             & do n't             & 151            & 2.0\%       \\
+        3                                                   & from poor families                                          & 27             & 3.4\%       & 3             & from poor families & 150            & 2.0\%       \\
+        4                                                   & to those in                                                 & 18             & 2.3\%       & 4             & one of the         & 145            & 1.9\%       \\
+        5                                                   & people in need                                              & 16             & 2.0\%       & 5             & the united states  & 115            & 1.5\%       \\
         \bottomrule
     \end{tabular}
-    \caption{Top-5 trigrams in PCL vs Non-PCL text (raw counts). Per-sample rate for ``those in need'': PCL 0.050 vs Non-PCL 0.012 (4.2$\times$ enrichment).}
+    \caption{Top-5 trigrams in PCL vs Non-PCL text. \% = occurrences per sample in that class ($n$ shown in header). ``in need of'' appears at near-identical per-sample rates in both classes (5.3\% vs 5.6\%), while ``those in need'' is strongly enriched in PCL; see Figure~\ref{fig:eda2a} (enrichment chart).}
     \label{tab:trigrams}
 \end{table}
 
 \subsubsection{Analysis}
 
 \begin{enumerate}[noitemsep]
-    \item \textbf{N-gram Patterns — Vulnerability-Framing Phrases.} Top bigrams in both classes are dominated by generic English function-word pairs (``of the'', ``in the''), which carry no discriminative power on their own. The signal emerges at the trigram level. Normalising by class size, PCL text shows a \textbf{4.2$\times$ enrichment} for ``those in need'' (0.050 per PCL sample vs 0.012 for Non-PCL), and ``people in need'' appears in PCL's top 10 but not in Non-PCL's. These phrases construct a narrative of passivity and dependency, which is a hallmark of patronising language. Non-PCL trigrams, by contrast, are factual and geopolitical: ``the united states'', ``the number of'', ``as well as''.
+    \item \textbf{N-gram Patterns: Vulnerability-Framing Phrases.} Top bigrams in both classes are dominated by generic English function-word pairs (``of the'', ``in the''), which carry no discriminative power on their own. The signal emerges at the trigram level: phrases such as ``those in need'', ``people in need'', and ``to those in'' construct a narrative of passivity and dependency — a hallmark of patronising language. Non-PCL trigrams, by contrast, are factual and geopolitical: ``the united states'', ``the number of'', ``as well as''. The per-sample rates and enrichment ratios for these trigrams are analysed in detail in point~2 below.
 
-    \item \textbf{Stop Word Density — PCL Uses More Elaborate Syntax.} PCL texts have a mean stop-word density of \textbf{48.47\%} (median 48.8\%) versus \textbf{45.01\%} (median 45.2\%) for Non-PCL, representing a gap of \textbf{3.46 percentage points} (std $\approx$9.7\% in both classes, confirming the difference is systematic). The higher density reflects the clause-heavy sentence structures of patronising language (e.g.\ \textit{``they are the ones who are in need of our help''}) compared to the more direct, noun-heavy style of factual reporting.
+    \item \textbf{Trigram Enrichment: Raw Counts Are Misleading.} ``In need of'' appears 10$\times$ more often in Non-PCL than PCL in absolute terms, yet normalising by class size reveals near-identical per-sample rates (5.3\% PCL vs 5.6\% Non-PCL), making it non-discriminative. By contrast, ``those in need'' is strongly PCL-enriched (PCL 5.0\% vs Non-PCL $\approx$1.2\%, a 4.2$\times$ ratio), as is ``people in need'', which appears in PCL's top~10 but is absent from Non-PCL's. These contrasts are directly visible in the enrichment chart (Figure~\ref{fig:eda2a}, row~3 right). Crucially, all discriminative trigrams consist almost entirely of stop words (``those'', ``in'', ``need'', ``of''), confirming that stop-word removal would destroy the class signal rather than improve the representation.
 
     \item \textbf{Distinctive Vocabulary (Per-Sample Rates).} After normalising for class size, several words are significantly over-represented in PCL text: ``need'' (2.2$\times$), ``poor'' (2.2$\times$), ``children'', ``homeless'', and ``help'' appear in the PCL top-10 but are absent from the Non-PCL top-10 entirely. This confirms a PCL lexical fingerprint centred on \textit{vulnerability, dependency, and aid}. Non-PCL top words (``immigrants'', ``vulnerable'', ``disabled'') cover the same topic domain but without the emotional framing.
 \end{enumerate}
@@ -156,33 +166,27 @@ The basic statistical profiling reveals concrete structural challenges in the PC
 \subsubsection{Impact Statement}
 
 \begin{itemize}[noitemsep]
-    \item \textbf{Retain Stop Words for Bag-of-Words Models.} The 3.46\% higher stop-word density in PCL text means connective and auxiliary words actively participate in PCL phrasing. Trigrams like ``in need of'', ``to those in'', and ``those in need'' depend entirely on stop words. For any TF-IDF baseline, stop words must be \textbf{retained} with \texttt{ngram\_range=(1,\,3)}.
+    \item \textbf{Multi-word Patterns are Essential, and Stop Words Must Be Kept.} The discriminative trigrams (``those in need'', ``people in need'', ``to those in'') are composed almost entirely of stop words. A unigram representation would miss these signals entirely; any text representation that strips stop words before computing n-gram features destroys the most discriminative patterns in the corpus. Any model must capture multi-word dependencies to detect these vulnerability-framing phrases.
 
-    \item \textbf{N-gram Features for Classical Models.} The distinctive trigrams are strong discriminative signals that a unigram model would miss entirely. Any SVM or logistic regression baseline should be trained on \textbf{TF-IDF weighted 1--3-grams}.
-
-    \item \textbf{Class-Size Normalisation in Analysis.} Raw frequency counts are dominated by the 9.5$\times$ larger Non-PCL class. Per-sample enrichment ratios must be computed for any fair lexical comparison, as demonstrated above.
-
-    \item \textbf{Pre-trained Embeddings Domain Alignment.} The PCL vocabulary is centred on humanitarian/social-narrative themes. Embeddings pre-trained on news or social-media corpora will better capture these semantic relationships than generic web-crawl embeddings.
-
-    \item \textbf{Keyword-Based Baseline.} The identified enriched vocabulary enables a simple TF-IDF logistic regression baseline, providing a useful lower bound to verify that the trained neural model learns beyond surface lexical patterns.
+    \item \textbf{Contextual Embeddings Over Static Representations.} The discriminative PCL vocabulary consists of common words (``need'', ``those'', ``poor'') whose patronising force emerges only in specific multi-word combinations (e.g.\ ``those in need'' vs.\ ``in need of''). Static embeddings assign identical vectors to ``need'' in both contexts, making them unable to capture this distinction. Contextual embeddings from a transformer encoder (RoBERTa) resolve this by dynamically encoding each token in the context of its neighbours, making them particularly well-suited to detecting these pattern-driven PCL signals.
 \end{itemize}
 
 \newpage
 %==============================================================================
-\section{Exercise 3: Proposed Approach}
+\section{Proposed Approach}
 %==============================================================================
 
 \subsection{Proposed Approach}
 
-We propose to fine-tune \textbf{RoBERTa-base} (Liu et al., 2019) as the core encoder, augmented with three targeted modifications designed around the structural challenges identified in the EDA: a dual-head multi-task architecture that exploits the dataset's fine-grained label taxonomy, a compound strategy to mitigate the 9.5:1 class imbalance, and context-aware input formatting that injects the vulnerability keyword as an explicit signal.
+We propose to fine-tune \textbf{RoBERTa-base} \cite{liu2019robertarobustlyoptimizedbert} as the core encoder, augmented with three targeted modifications designed around the structural challenges identified in the EDA: a dual-head multi-task architecture that exploits the dataset's fine-grained label taxonomy, a compound strategy to mitigate the 9.5:1 class imbalance, and context-aware input formatting that injects the vulnerability keyword as an explicit signal.
 
 \subsubsection{Model Architecture}
 
-We plan to attach two lightweight linear heads to the \texttt{[CLS]} token representation of a fine-tuned RoBERTa-base encoder. The \textbf{primary binary head} will produce the PCL / Non-PCL decision used at inference time. In addition, an \textbf{auxiliary multi-label head} will simultaneously predict the 7 fine-grained PCL category labels defined by P\'{e}rez-Almendros et al.\ (2020) during training. The two heads share the same encoder and are trained jointly under the combined loss:
+We plan to attach two lightweight linear heads to the \texttt{[CLS]} token representation of a fine-tuned RoBERTa-base encoder. The \textbf{primary binary head} will produce the PCL / Non-PCL decision used at inference time. In addition, an \textbf{auxiliary multi-label head} will simultaneously predict the 7 fine-grained PCL category labels defined in the \textit{Don't Patronize Me!} dataset \cite{perez-almendros-etal-2020-dont} during training. The two heads share the same encoder and are trained jointly under the combined loss:
 \begin{equation}
     \mathcal{L} = \mathcal{L}_{\text{focal}} + \lambda \cdot \mathcal{L}_{\text{aux}}
 \end{equation}
-where $\mathcal{L}_{\text{focal}}$ is Binary Focal Loss (Lin et al., 2017) on the binary head and $\mathcal{L}_{\text{aux}}$ is Binary Cross-Entropy on the auxiliary head. The auxiliary head will be discarded at inference; it serves purely as an additional supervision signal during training.
+where $\mathcal{L}_{\text{focal}}$ is Binary Focal Loss \cite{lin2018focallossdenseobject} on the binary head and $\mathcal{L}_{\text{aux}}$ is Binary Cross-Entropy on the auxiliary head. The auxiliary head will be discarded at inference; it serves purely as an additional supervision signal during training.
 
 \subsubsection{Data Preprocessing}
 
@@ -194,7 +198,7 @@ We propose three complementary strategies to address the 9.5:1 class imbalance:
 
 \begin{enumerate}[noitemsep]
     \item \textbf{Weighted batch sampling} to oversample PCL positives in every mini-batch, ensuring a consistent minority-class gradient signal throughout training.
-    \item \textbf{Focal Loss} (Lin et al., 2017) to down-weight easy-to-classify negatives at the loss level, directing gradient updates toward the harder PCL examples.
+    \item \textbf{Focal Loss} \cite{lin2018focallossdenseobject} to down-weight easy-to-classify negatives at the loss level, directing gradient updates toward the harder PCL examples.
     \item \textbf{Post-hoc decision threshold optimisation} by sweeping thresholds on the official dev set after training, replacing the default 0.5 boundary which is biased toward the majority class.
 \end{enumerate}
 
@@ -220,11 +224,11 @@ The default 0.5 decision threshold is calibrated for balanced classes. For an im
 
 \subsubsection{Expected Outcome}
 
-The shared task baseline RoBERTa-base model achieves $\text{F1} = 0.48$ on the official dev set (P\'{e}rez-Almendros et al., 2020). We expect our proposed modifications to deliver a substantial improvement, primarily by increasing the model's recall on PCL-positive examples through better imbalance handling, while the auxiliary multi-task objective and keyword context injection should additionally improve precision by anchoring predictions in structured PCL patterns.
+The shared task baseline RoBERTa-base model achieves $\text{F1} = 0.48$ on the official dev set \cite{perez-almendros-etal-2020-dont}. We expect our proposed modifications to deliver a substantial improvement, primarily by increasing the model's recall on PCL-positive examples through better imbalance handling, while the auxiliary multi-task objective and keyword context injection should additionally improve precision by anchoring predictions in structured PCL patterns.
 
 \newpage
 %==============================================================================
-\section{Exercise 4: Model Training}
+\section{Model Training}
 %==============================================================================
 
 The proposed approach was implemented in PyTorch using the HuggingFace \texttt{transformers} library. The full training code and model weights are available in the \texttt{BestModel/} folder of the repository.
@@ -267,7 +271,7 @@ RoBERTa-base was loaded from the \texttt{FacebookAI/roberta-base} checkpoint. Tw
 
 \subsubsection{Data Split and Evaluation Protocol}
 
-The official training set (8,375 samples) was used for training and the official dev set (399 samples) was used as the held-out evaluation set throughout all experiments; no internal dev split was created, as the official dev set provides a stable benchmark comparable across runs. The official test set (3,832 samples, labels withheld) was used only for final prediction.
+The official training set (8,375 samples) was used for training and the official dev set (2094 samples) was used as the held-out evaluation set throughout all experiments; no internal dev split was created, as the official dev set provides a stable benchmark comparable across runs. The official test set (3,832 samples, labels withheld) was used only for final prediction.
 
 After training, a threshold sweep over $t \in [0.05, 0.95]$ (step 0.01) was run on the dev set to select the decision boundary maximising PCL-class F1.
 
@@ -295,180 +299,235 @@ After training, a threshold sweep over $t \in [0.05, 0.95]$ (step 0.01) was run 
     \label{tab:training}
 \end{table}
 
-The best checkpoint was saved at epoch 7 with dev F1 $= 0.606$, representing a $\sim$26\% relative improvement over the 0.48 baseline. Training loss continued to decrease after epoch 7, but dev F1 plateaued and declined, indicating overfitting; early stopping triggered after epoch 10 (patience exhausted). The optimal decision threshold found by the sweep was $t = 0.50$.
+The best checkpoint was saved at epoch 7 with dev F1 $= 0.606$, representing a $\sim$26\% relative improvement over the 0.48 baseline. Training loss continued to decrease after epoch 7, but dev F1 plateaued and declined, indicating overfitting; training ran to the maximum of 10 epochs without early stopping triggering (only 3 of 5 patience epochs elapsed). The optimal decision threshold found by the sweep was $t = 0.50$.
 
 \newpage
 %==============================================================================
-\section{Exercise 5.1: Global Evaluation}
+\section{Evaluation and Error Analysis}
 %==============================================================================
 
-% Note: Actual submission is via dev.txt and test.txt in your repository
+\subsection{Global Evaluation}
 
-\noindent\textbf{Submission Files:}
+\noindent\textbf{Leaderboard Name:} \texttt{jz4623}
+
+\bigskip
+The model's predictions on both the official dev set and the official test set have been generated using the best checkpoint (epoch 7, $t = 0.50$) and committed to the repository.
+
 \begin{itemize}[noitemsep]
-    \item \texttt{dev.txt} - Predictions on official dev set
-    \item \texttt{test.txt} - Predictions on official test set (3832 lines)
+    \item \texttt{dev.txt}: 2,094 predictions on the official dev set (one integer per line, 0 or 1).
+    \item \texttt{test.txt}: 3,832 predictions on the official test set (one integer per line, 0 or 1).
 \end{itemize}
 
 \noindent\textbf{Dev Set Performance:}
-\begin{itemize}[noitemsep]
-    \item F1 Score (PCL class): \textit{[Your score]}
-    \item Baseline to beat: 0.48
-\end{itemize}
-
-\newpage
-%==============================================================================
-\section{Exercise 5.2: Local Evaluation}
-%==============================================================================
-
-\subsection{Error Analysis}
-
-\textit{[Perform detailed error analysis. Consider:
-            \begin{itemize}[noitemsep]
-                \item Manually inspect misclassified samples
-                \item Identify patterns in errors (e.g., sarcasm, specific keywords, sentence length)
-                \item Compare with baseline model errors if available
-                \item Categorise error types
-            \end{itemize}]}
-
-\subsubsection{False Positives Analysis}
-
-\textit{[Examples and patterns where model predicted PCL but ground truth was No PCL]}
 
 \begin{table}[H]
     \centering
-    \begin{tabular}{p{10cm}c}
+    \begin{tabular}{lcc}
         \toprule
-        \textbf{Example Text} & \textbf{Predicted/True} \\
+        \textbf{Metric} & \textbf{Our Model} & \textbf{Baseline} \\
         \midrule
-        {[Example 1]}         & 1/0                     \\
-        {[Example 2]}         & 1/0                     \\
+        F1 (PCL class)  & \textbf{0.606}     & 0.48              \\
+        Precision (PCL) & 0.649              & --                \\
+        Recall (PCL)    & 0.568              & --                \\
+        Accuracy        & 0.930              & --                \\
         \bottomrule
     \end{tabular}
-    \caption{False Positive Examples}
+    \caption{Dev set performance of the submitted model against the official baseline.}
+    \label{tab:global}
+\end{table}
+
+The submitted model achieves $\text{F1} = 0.606$ on the official dev set, a $\sim$26\% relative improvement over the 0.48 baseline. The model operates at a precision of 0.649 and recall of 0.568, reflecting a moderate bias toward precision: the model is selective about what it labels PCL, keeping the false positive rate low (3.2\%) at the cost of missing roughly 43\% of true PCL examples.
+
+\subsection{Local Evaluation}
+
+\subsubsection{Error Analysis}
+
+All analysis was performed on the official dev set (2,094 samples; 199 PCL positives, 1,895 Non-PCL) using the saved probability scores from the best checkpoint. The model predicts PCL / Non-PCL at decision threshold $t = 0.50$.
+
+\paragraph{Confusion Matrix Overview}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lcc}
+        \toprule
+                              & \textbf{Predicted Non-PCL} & \textbf{Predicted PCL} \\
+        \midrule
+        \textbf{True Non-PCL} & 1834 (TN)                  & 61 (FP)                \\
+        \textbf{True PCL}     & 86 (FN)                    & 113 (TP)               \\
+        \bottomrule
+    \end{tabular}
+    \caption{Confusion matrix on the official dev set.}
+    \label{tab:cm}
+\end{table}
+
+The model makes 147 total errors: 61 false positives and 86 false negatives. The false positive rate is low (FPR $= 0.032$), meaning the model rarely mislabels Non-PCL text as patronising. However, the false negative rate is high (FNR $= 0.432$): the model misses 43\% of all true PCL examples, indicating that recall is the primary weakness.
+
+\paragraph{False Positive Analysis}
+
+False positives are cases where the model assigned a high PCL probability to Non-PCL text. The five most confident false positives are shown in Table~\ref{tab:fp}.
+
+\begin{table}[H]
+    \centering\small
+    \begin{tabular}{p{0.62\linewidth}p{0.13\linewidth}c}
+        \toprule
+        \textbf{Full text} & \textbf{Keyword} & \textbf{Prob.} \\
+        \midrule
+        Christmas is celebration of the birth of not merely a child, but a child who changed the destiny of humans forever. It is celebration of the fact that God wanted to be a part of the human race and so he took on flesh and blood and became human like us. We can also show unconditional love through our good deeds and helping those who are in need of our help and care. Be human and merciful.
+                           & in-need          & 0.978          \\
+        \addlinespace
+        Jesus begins his teaching in Matthew with the Sermon on the Mount. One group he blesses is those in need of comfort, Blessed are they who mourn, for they will be comforted (Mt 5:4).
+                           & in-need          & 0.973          \\
+        \addlinespace
+        Usually children of poor families remember their parents' struggles and become generous to them as poverty early in life drove them to success. It is the children of the rich that feel a sense of entitlement that mostly becomes ungrateful to their parents.
+                           & poor-families    & 0.972          \\
+        \addlinespace
+        Earlier at the ceremony, Azlan, who is also Pauh assemblyman, handed out daily necessities donated by NCIA to 102 poor families in the state constituency.
+                           & poor-families    & 0.970          \\
+        \addlinespace
+        A clinic called ``Hope'' helps a Syrian refugee boy cope with diabetes.
+                           & refugee          & 0.968          \\
+        \bottomrule
+    \end{tabular}
+    \caption{Top-5 most confident false positives (true label: Non-PCL).}
     \label{tab:fp}
 \end{table}
 
-\subsubsection{False Negatives Analysis}
+A clear pattern emerges: false positives are predominantly triggered by \textbf{surface vocabulary associated with vulnerability and aid} (``those in need'', ``poor families'', ``donated necessities'') in texts that are factual or spiritually framed rather than patronising. The keyword prefix \texttt{in-need} appears disproportionately; the model has learned strong associations between this keyword and PCL without sufficiently discriminating between genuine compassion-framings and neutral uses. This is consistent with the EDA finding that the lexical fingerprint of PCL and factual reporting can overlap heavily.
 
-\textit{[Examples and patterns where model predicted No PCL but ground truth was PCL]}
+\paragraph{False Negative Analysis}
+
+False negatives are true PCL examples the model failed to detect (predicted probability $< 0.50$). The five most confidently missed cases are shown in Table~\ref{tab:fn}.
 
 \begin{table}[H]
-    \centering
-    \begin{tabular}{p{10cm}c}
+    \centering\small
+    \begin{tabular}{p{0.62\linewidth}p{0.13\linewidth}c}
         \toprule
-        \textbf{Example Text} & \textbf{Predicted/True} \\
+        \textbf{Full text} & \textbf{Keyword} & \textbf{Prob.} \\
         \midrule
-        {[Example 1]}         & 0/1                     \\
-        {[Example 2]}         & 0/1                     \\
+        The indigenous Palestinians see themselves abandoned by the powerful nations of the UN. In sheer hopelessness and a sense of dehumization they are, regrettably, now resorting to nihilistic activities trying to harm Israeli Jews and getting killed every day by the trigger happy Israelis --- civilians and security forces alike. It is a sad development in a region that has cried for justice for too long --- almost 70 years --- only to be ignored and severely punished for their noncompliance to the Zionist dream of Eretz Israel.
+                           & hopeless         & 0.016          \\
+        \addlinespace
+        Nearly 15,000 West African teenagers leave their homes every year to play football in Europe. Few make good on their dreams. Some are lured by corrupt ``agents'', smuggled across the searing Sahara and discarded in the streets of Europe, resigned to selling fake designer bags as undocumented immigrants. Others are nabbed by academies and feeder teams affiliated with European clubs and often dumped like bad stocks.
+                           & immigrant        & 0.016          \\
+        \addlinespace
+        Famously progressive San Francisco has among America's most eco-friendly public policies and has declared itself a sanctuary to immigrants it considers persecuted by President Donald Trump's administration.
+                           & migrant          & 0.017          \\
+        \addlinespace
+        She remembers how hard being homeless hit her. She remembers, too, how she would try and act as mad as possible to intimidate people and stop them from coming close to her. She would turn as she walked and make loud noises so that people would leave her alone. ``I handled my situation of being homeless pretty easily,'' she says. ``I had football to focus on. I wanted to represent my country.''
+                           & homeless         & 0.017          \\
+        \addlinespace
+        He said: ``I think we can consider introducing a negligible telecom surcharge to be entirely borne by the initiator of a call. In order to protect the poor and vulnerable amongst us, we could structure it to only take effect after the third minute of talk.''
+                           & vulnerable       & 0.017          \\
         \bottomrule
     \end{tabular}
-    \caption{False Negative Examples}
+    \caption{Top-5 most confident false negatives (true label: PCL, predicted Non-PCL).}
     \label{tab:fn}
 \end{table}
 
-\subsubsection{Error Patterns Summary}
+The representative examples share a common characteristic: the PCL is \textbf{implicit or structurally subtle}. The Palestinian example presupposes a helpless, abandoned group as objective fact, encoding condescension in the narrative frame rather than in any explicit vocabulary. The immigrant example deploys a dehumanising metaphor (``dumped like bad stocks'') to position the subjects as naive victims of exploitation. The homeless example is PCL through empathy performance: the narration reduces the subject to an object of admiration rather than treating her as an agent. Across all three cases the model assigns near-zero probability ($< 0.02$), consistent with its reliance on surface vocabulary: none of these texts contain the vulnerability-aid lexicon that drives positive predictions.
 
-\textit{[Summarise the main patterns observed in errors]}
+\subsubsection{PCL Category Breakdown}
 
-\subsection{Additional Local Evaluation}
-
-\textit{[Perform at least one additional local evaluation. Options include:]}
-
-\subsubsection{Option A: Ablation Study}
-
-\textit{[Systematically remove components to identify what contributes to performance]}
+Table~\ref{tab:cat} breaks down model errors by the 7 fine-grained PCL categories. Each PCL-positive example may carry multiple category labels.
 
 \begin{table}[H]
     \centering
-    \begin{tabular}{lc}
+    \begin{tabular}{lccc}
         \toprule
-        \textbf{Configuration} & \textbf{F1 Score} \\
+        \textbf{PCL Category}      & \textbf{TP} & \textbf{FN} & \textbf{Miss Rate} \\
         \midrule
-        Full Model             & X.XX              \\
-        Without Component A    & X.XX              \\
-        Without Component B    & X.XX              \\
+        The Poorer, the Merrier    & 5           & 6           & 0.545              \\
+        Presupposition             & 31          & 31          & 0.500              \\
+        Authority Voice            & 20          & 18          & 0.474              \\
+        Compassion                 & 65          & 41          & 0.387              \\
+        Metaphor                   & 33          & 19          & 0.365              \\
+        Unbalanced Power Relations & 93          & 49          & 0.345              \\
+        Shallow Solution           & 26          & 10          & 0.278              \\
         \bottomrule
     \end{tabular}
-    \caption{Ablation Study Results}
-    \label{tab:ablation}
+    \caption{Model performance by PCL category (sorted by miss rate). A sample may belong to multiple categories.}
+    \label{tab:cat}
 \end{table}
 
-% \subsubsection{Option B: Confusion Matrix Analysis}
-%
-% \begin{figure}[H]
-%     \centering
-%     % \includegraphics[width=0.5\textwidth]{confusion_matrix.png}
-%     \caption{Confusion Matrix on Dev Set}
-%     \label{fig:cm}
-% \end{figure}
+The model struggles most with \textit{The Poorer, the Merrier} (55\% miss rate) and \textit{Presupposition} (50\% miss rate). Both categories encode PCL through \textbf{framing rather than explicit vocabulary}: \textit{Presupposition} takes for granted a diminished view of the subject group without stating it, while \textit{The Poorer, the Merrier} romanticises vulnerability, casting the community's hardship as character-building or admirable, without any overtly demeaning lexicon. By contrast, \textit{Shallow Solution} (28\% miss rate) is the best-detected category, likely because it involves more overt lexical markers of naive or reductive problem-framing.
 
-% \subsubsection{Option C: Precision-Recall Curve}
-%
-% \begin{figure}[H]
-%     \centering
-%     % \includegraphics[width=0.6\textwidth]{pr_curve.png}
-%     \caption{Precision-Recall Curve}
-%     \label{fig:pr}
-% \end{figure}
+\subsubsection{Per-Keyword Error Rates}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lrrrrrcc}
+        \toprule
+        \textbf{Keyword} & \textbf{Total} & \textbf{PCL} & \textbf{TP} & \textbf{FP} & \textbf{FN} & \textbf{Recall} & \textbf{Precision} \\
+        \midrule
+        in-need          & 226            & 33           & 30          & 13          & 3           & 0.909           & 0.698              \\
+        refugee          & 188            & 13           & 8           & 4           & 5           & 0.615           & 0.667              \\
+        homeless         & 212            & 29           & 18          & 7           & 11          & 0.621           & 0.720              \\
+        hopeless         & 217            & 26           & 15          & 11          & 11          & 0.577           & 0.577              \\
+        disabled         & 194            & 14           & 7           & 3           & 7           & 0.500           & 0.700              \\
+        poor-families    & 190            & 38           & 18          & 12          & 20          & 0.474           & 0.600              \\
+        vulnerable       & 209            & 20           & 9           & 5           & 11          & 0.450           & 0.643              \\
+        migrant          & 207            & 5            & 2           & 1           & 3           & 0.400           & 0.667              \\
+        immigrant        & 218            & 7            & 2           & 1           & 5           & 0.286           & 0.667              \\
+        women            & 233            & 14           & 4           & 4           & 10          & 0.286           & 0.500              \\
+        \bottomrule
+    \end{tabular}
+    \caption{Per-keyword error breakdown on the dev set (sorted by recall).}
+    \label{tab:kw}
+\end{table}
+
+Performance varies considerably across keywords. The model performs best on \texttt{in-need} (recall 0.909), where PCL vocabulary is most surface-visible. It performs worst on \texttt{women} and \texttt{immigrant} (recall 0.286), where PCL is more likely to be expressed through structural framing or political narrative rather than explicit empathy language. The higher false positive rate for \texttt{hopeless} (11 FPs) suggests the model conflates emotionally charged language about the keyword group with patronising intent.
+
+\subsection{Additional Local Evaluation: Precision-Recall Analysis and Score Distributions}
+
+\subsubsection{Precision-Recall Curve}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.62\textwidth]{figures/pr_curve.png}
+    \caption{Precision-Recall curve on the dev set (PR-AUC $= 0.608$). The red dot marks the operating point at $t = 0.50$.}
+    \label{fig:pr}
+\end{figure}
+
+The PR-AUC of 0.608 indicates moderate discriminative ability beyond the 9.5\% positive rate of a random classifier (PR-AUC $\approx$ 0.095; dev-set prevalence $= 199/2094 \approx 0.095$). The curve shows that the model can achieve precision above 0.80 at the cost of very low recall ($< 0.20$), confirming that it produces a well-calibrated probability ordering even if the absolute recall is limited. Shifting the threshold to $t \approx 0.35$ would increase recall to $\sim$0.70 while dropping precision to $\sim$0.50, a viable trade-off for applications where missing PCL is more costly than false alarms.
+
+\subsubsection{Score Distribution by True Label}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.62\textwidth]{figures/score_distribution.png}
+    \caption{Distribution of predicted PCL probabilities for true Non-PCL (grey) and true PCL (blue) examples on the dev set.}
+    \label{fig:scores}
+\end{figure}
+
+The score distributions show good separation near the extremes: Non-PCL examples cluster strongly at low probabilities ($< 0.20$) and PCL examples are more broadly spread across the range. However, a substantial portion of the true PCL mass falls below 0.50, explaining the high false negative rate. The long left tail of the PCL distribution (scores near 0) corresponds to the structurally subtle categories identified in the category breakdown, namely \textit{Presupposition} and \textit{The Poorer, the Merrier}, which the model assigns near-zero probability despite being true positives.
 
 \subsubsection{Insights and Discussion}
 
-\textit{[Discuss what your local evaluation reveals about your model's behaviour, strengths, and limitations]}
+The local evaluation reveals two distinct failure modes:
 
-\newpage
-%==============================================================================
-\section{Exercise 6: Submission Checklist}
-%==============================================================================
+\begin{enumerate}[noitemsep]
+    \item \textbf{Lexical over-triggering (FPs):} The model has learned strong associations between vulnerability-topic vocabulary (``those in need'', ``poor families'') and the PCL label, causing it to fire on factual or spiritually framed text sharing the same surface forms. This is a direct consequence of keyword prefix injection: the {\texttt{[in-need]}} prefix activates PCL-associated representations even when the text is non-patronising. A potential mitigation would be to include more lexically diverse Non-PCL examples during training.
+    \item \textbf{Implicit PCL blindness (FNs):} The model largely fails to detect PCL encoded in narrative framing, assumed premises, or the writer's self-positioning (\textit{The Poorer, the Merrier}, \textit{Presupposition}, \textit{Authority Voice}). These categories do not rely on a consistent surface vocabulary, making them difficult to detect from the {\texttt{[CLS]}} token alone. Addressing this would likely require richer contextual modelling, for example attention over the full paragraph to capture narrative arc, or targeted data augmentation.
+\end{enumerate}
 
-% This section helps ensure your submission is complete and well-organised
-
-\subsection{Report Checklist}
-
-\begin{itemize}
-    \item[$\square$] Exercise 1: Critical Paper Review (Q1, Q2, Q3)
-    \item[$\square$] Exercise 2: Two EDA techniques with visuals, analysis, and impact statements
-    \item[$\square$] Exercise 3: Proposed approach with rationale
-    \item[$\square$] Exercise 5.2: Error analysis and additional local evaluation
-    \item[$\square$] GitHub/GitLab link on front page
-    \item[$\square$] Leaderboard name on front page
-    \item[$\square$] Clear section organisation
-    \item[$\square$] Professional writing quality
-\end{itemize}
-
-\subsection{Repository Checklist}
-
-\begin{itemize}
-    \item[$\square$] Repository is PUBLIC after deadline
-    \item[$\square$] \texttt{BestModel/} folder with training code
-    \item[$\square$] \texttt{dev.txt} - predictions (correct format)
-    \item[$\square$] \texttt{test.txt} - 3832 lines of predictions (0 or 1)
-    \item[$\square$] Clear README with instructions
-    \item[$\square$] Requirements/dependencies listed
-\end{itemize}
+Overall, the model is conservative and specific: it reliably detects \textbf{explicit, vocabulary-driven PCL} (particularly in \texttt{in-need} contexts) but struggles with the more linguistically sophisticated forms of patronising language that dominate the tail of the error distribution.
 
 %==============================================================================
 \newpage
-\section*{References}
+\section{Conclusion}
 %==============================================================================
 
-\begin{thebibliography}{9}
+This report addressed binary Patronising and Condescending Language (PCL) detection on the \textit{Don't Patronize Me!}\ dataset. The EDA established two key structural challenges---a severe 9.5:1 class imbalance and a discriminative signal carried by multi-word, stop-word-heavy phrases rather than individual vocabulary items---that directly motivated the design choices in our proposed model.
 
-    \bibitem{perez2020dont}
-    P\'{e}rez-Almendros, C., Espinosa-Anke, L., and Schockaert, S. (2020).
-    \textit{Don't Patronize Me! An Annotated Dataset with Patronizing and Condescending Language towards Vulnerable Communities.}
-    In \textit{Proceedings of COLING 2020}, pages 5891--5902.
+The submitted system fine-tunes RoBERTa-base with a multi-task dual-head architecture, Focal Loss, weighted batch sampling, keyword prefix injection, and post-hoc threshold optimisation. The best checkpoint, saved at epoch 7 of 10, achieves $\text{F1} = 0.606$ on the official dev set, a $\sim$26\% relative improvement over the 0.48 baseline. The model is conservative and high-precision (precision 0.649, recall 0.568), operating with a very low false positive rate of 3.2\%.
 
-    \bibitem{liu2019roberta}
-    Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., Levy, O., Lewis, M., Zettlemoyer, L., and Stoyanov, V. (2019).
-    \textit{RoBERTa: A Robustly Optimized BERT Pretraining Approach.}
-    arXiv preprint arXiv:1907.11692.
+Error analysis reveals two distinct failure modes that point to the path forward. First, lexical over-triggering causes false positives on factual text that shares PCL vocabulary but not PCL intent; this is partly a side-effect of the keyword prefix and could be mitigated with more lexically diverse non-PCL training examples. Second, the model is largely blind to structurally implicit PCL (\textit{Presupposition}, \textit{The Poorer, the Merrier}) where condescension is encoded in narrative framing rather than surface vocabulary; addressing these categories would require richer discourse-level modelling or targeted data augmentation.
 
-    \bibitem{lin2017focal}
-    Lin, T.-Y., Goyal, P., Girshick, R., He, K., and Doll\'{a}r, P. (2017).
-    \textit{Focal Loss for Dense Object Detection.}
-    In \textit{Proceedings of ICCV 2017}, pages 2980--2988.
+Future work could explore span-level supervision (exploiting the available annotation spans), a lower decision threshold to trade precision for recall in recall-critical applications, and RoBERTa-large for additional encoder capacity on the implicit PCL categories.
 
-\end{thebibliography}
+%==============================================================================
+\newpage
+\bibliographystyle{ieeetr}
+\bibliography{references}
 
 \end{document}
