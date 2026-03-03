@@ -299,7 +299,7 @@ After training, a threshold sweep over $t \in [0.05, 0.95]$ (step 0.01) was run 
     \label{tab:training}
 \end{table}
 
-The best checkpoint was saved at epoch 7 with dev F1 $= 0.606$, representing a $\sim$26\% relative improvement over the 0.48 baseline. Training loss continued to decrease after epoch 7, but dev F1 plateaued and declined, indicating overfitting; training ran to the maximum of 10 epochs without early stopping triggering (only 3 of 5 patience epochs elapsed). The optimal decision threshold found by the sweep was $t = 0.50$.
+The best checkpoint was saved at epoch 7 with dev F1 $= 0.606$, representing a $\sim$26\% relative improvement over the 0.48 baseline. Training loss continued to decrease after epoch 7, but dev F1 plateaued and declined, indicating overfitting; training ran to the maximum of 10 epochs without early stopping triggering (only 3 of 5 patience epochs elapsed). The optimal decision threshold found by the sweep was $t = 0.50$. This is mildly surprising given the 9.5:1 class imbalance, which would normally push the optimal threshold well below the default; it suggests that the combination of Focal Loss and weighted batch sampling was sufficient to recalibrate the model's output probabilities toward the minority class, so no additional correction at the decision boundary was needed.
 
 \newpage
 %==============================================================================
